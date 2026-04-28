@@ -61,11 +61,11 @@ const navItems: NavItem[] = [
     href: '/dashboard/devices',
     icon: <Wifi className="w-5 h-5" />,
   },
-  {
-    label: 'Analytics',
-    href: '/dashboard/analytics',
-    icon: <BarChart3 className="w-5 h-5" />,
-  },
+  // {
+  //   label: 'Analytics',
+  //   href: '/dashboard/analytics',
+  //   icon: <BarChart3 className="w-5 h-5" />,
+  // },
   {
     label: 'Network',
     href: '/dashboard/network',
