@@ -63,63 +63,63 @@ export default function NetworkPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Network</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="text-3xl font-bold text-white">Network</h1>
+        <p className="text-white/50 mt-1">
           LoRa network performance and metrics
         </p>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+        <Card className="border-white/10 bg-white/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-white/50 flex items-center gap-2">
               <Signal className="w-4 h-4" />
               Avg. Signal Strength
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">-89 dBm</div>
-            <p className="text-xs text-muted-foreground mt-1">Good coverage</p>
+            <div className="text-2xl font-bold text-white">-89 dBm</div>
+            <p className="text-xs text-white/50 mt-1">Good coverage</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-white/10 bg-white/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-white/50 flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
               Avg. SNR
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">7.1 dB</div>
-            <p className="text-xs text-muted-foreground mt-1">Signal quality</p>
+            <div className="text-2xl font-bold text-white">7.1 dB</div>
+            <p className="text-xs text-white/50 mt-1">Signal quality</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-white/10 bg-white/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-white/50 flex items-center gap-2">
               <Zap className="w-4 h-4" />
               Avg. PDR
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">91.5%</div>
-            <p className="text-xs text-muted-foreground mt-1">Delivery rate</p>
+            <div className="text-2xl font-bold text-white">91.5%</div>
+            <p className="text-xs text-white/50 mt-1">Delivery rate</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-white/10 bg-white/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-white/50 flex items-center gap-2">
               <Radio className="w-4 h-4" />
               Avg. Latency
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">58 ms</div>
-            <p className="text-xs text-muted-foreground mt-1">Network delay</p>
+            <div className="text-2xl font-bold text-white">58 ms</div>
+            <p className="text-xs text-white/50 mt-1">Network delay</p>
           </CardContent>
         </Card>
       </div>
@@ -127,32 +127,33 @@ export default function NetworkPage() {
       {/* Charts */}
       <div className="space-y-6">
         {/* Signal Strength vs SNR */}
-        <Card>
+        <Card className="border-white/10 bg-white/5">
           <CardHeader>
-            <CardTitle>Signal Strength vs Signal-to-Noise Ratio</CardTitle>
+            <CardTitle className="text-white">Signal Strength vs Signal-to-Noise Ratio</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <ScatterChart data={signalData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                 <XAxis
                   dataKey="rssi"
                   name="RSSI (dBm)"
-                  stroke="var(--color-muted-foreground)"
+                  stroke="rgba(255,255,255,0.3)"
+                  tick={{ fill: '#ffffff', fontSize: 12 }}
                   type="number"
                   domain={[-120, -60]}
                 />
                 <YAxis
                   dataKey="snr"
                   name="SNR (dB)"
-                  stroke="var(--color-muted-foreground)"
+                  stroke="rgba(255,255,255,0.3)"
+                  tick={{ fill: '#ffffff', fontSize: 12 }}
                 />
                 <Tooltip
                   cursor={{ strokeDasharray: '3 3' }}
-                  contentStyle={{
-                    backgroundColor: 'var(--color-card)',
-                    border: '1px solid var(--color-border)',
-                  }}
+                  contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }}
+                  labelStyle={{ color: '#fff' }}
+                  itemStyle={{ color: '#fff' }}
                 />
                 <Scatter
                   name="Devices"
@@ -166,28 +167,26 @@ export default function NetworkPage() {
         </Card>
 
         {/* Packet Delivery Rate */}
-        <Card>
+        <Card className="border-white/10 bg-white/5">
           <CardHeader>
-            <CardTitle>Packet Delivery Rate (PDR) by Device</CardTitle>
+            <CardTitle className="text-white">Packet Delivery Rate (PDR) by Device</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={pdrData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                 <XAxis
                   dataKey="device"
-                  stroke="var(--color-muted-foreground)"
-                  style={{ fontSize: '12px' }}
+                  stroke="rgba(255,255,255,0.3)"
+                  tick={{ fill: '#ffffff', fontSize: 12 }}
                 />
                 <YAxis
-                  stroke="var(--color-muted-foreground)"
-                  style={{ fontSize: '12px' }}
+                  stroke="rgba(255,255,255,0.3)"
+                  tick={{ fill: '#ffffff', fontSize: 12 }}
                 />
                 <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'var(--color-card)',
-                    border: '1px solid var(--color-border)',
-                  }}
+                  contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }}
+                  labelStyle={{ color: '#fff' }}
                 />
                 <Bar dataKey="pdr" fill="#10b981" name="PDR (%)" />
               </BarChart>
@@ -196,29 +195,27 @@ export default function NetworkPage() {
         </Card>
 
         {/* Latency Trend */}
-        <Card>
+        <Card className="border-white/10 bg-white/5">
           <CardHeader>
-            <CardTitle>Network Latency Trend</CardTitle>
+            <CardTitle className="text-white">Network Latency Trend</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={latencyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                 <XAxis
                   dataKey="time"
-                  stroke="var(--color-muted-foreground)"
-                  style={{ fontSize: '12px' }}
+                  stroke="rgba(255,255,255,0.3)"
+                  tick={{ fill: '#ffffff', fontSize: 12 }}
                 />
                 <YAxis
-                  stroke="var(--color-muted-foreground)"
-                  style={{ fontSize: '12px' }}
-                  label={{ value: 'Latency (ms)', angle: -90, position: 'insideLeft' }}
+                  stroke="rgba(255,255,255,0.3)"
+                  tick={{ fill: '#ffffff', fontSize: 12 }}
+                  label={{ value: 'Latency (ms)', angle: -90, position: 'insideLeft', fill: 'rgba(255,255,255,0.4)', fontSize: 11 }}
                 />
                 <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'var(--color-card)',
-                    border: '1px solid var(--color-border)',
-                  }}
+                  contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }}
+                  labelStyle={{ color: '#fff' }}
                 />
                 <Line
                   type="monotone"
@@ -234,31 +231,31 @@ export default function NetworkPage() {
       </div>
 
       {/* Device Network Details Table */}
-      <Card>
+      <Card className="border-white/10 bg-white/5">
         <CardHeader>
-          <CardTitle>LoRa Device Metrics</CardTitle>
+          <CardTitle className="text-white">LoRa Device Metrics</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Device</TableHead>
-                  <TableHead className="text-right">RSSI (dBm)</TableHead>
-                  <TableHead className="text-right">SNR (dB)</TableHead>
-                  <TableHead className="text-right">PDR (%)</TableHead>
-                  <TableHead className="text-right">Latency (ms)</TableHead>
-                  <TableHead>Signal Quality</TableHead>
+                <TableRow className="border-white/10">
+                  <TableHead className="text-white/60">Device</TableHead>
+                  <TableHead className="text-right text-white/60">RSSI (dBm)</TableHead>
+                  <TableHead className="text-right text-white/60">SNR (dB)</TableHead>
+                  <TableHead className="text-right text-white/60">PDR (%)</TableHead>
+                  <TableHead className="text-right text-white/60">Latency (ms)</TableHead>
+                  <TableHead className="text-white/60">Signal Quality</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {mockLoRaMetrics.map((metric) => (
-                  <TableRow key={metric.deviceId}>
-                    <TableCell className="font-medium">{metric.deviceName}</TableCell>
-                    <TableCell className="text-right">{metric.rssi}</TableCell>
-                    <TableCell className="text-right">{metric.snr.toFixed(1)}</TableCell>
-                    <TableCell className="text-right">{metric.pdr.toFixed(1)}</TableCell>
-                    <TableCell className="text-right">{metric.latency}</TableCell>
+                  <TableRow key={metric.deviceId} className="border-white/10">
+                    <TableCell className="font-medium text-white">{metric.deviceName}</TableCell>
+                    <TableCell className="text-right text-white/80">{metric.rssi}</TableCell>
+                    <TableCell className="text-right text-white/80">{metric.snr.toFixed(1)}</TableCell>
+                    <TableCell className="text-right text-white/80">{metric.pdr.toFixed(1)}</TableCell>
+                    <TableCell className="text-right text-white/80">{metric.latency}</TableCell>
                     <TableCell>
                       <Badge variant={getSignalQuality(metric.rssi).color as any}>
                         {getSignalQuality(metric.rssi).text}

@@ -4,158 +4,84 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import { AlertCircle, Wifi, TrendingUp } from "lucide-react";
+  Droplets,
+  Wind,
+  Leaf,
+  AlertCircle,
+  CheckCircle,
+  TrendingUp,
+  Activity,
+} from "lucide-react";
+
 import { useAuth } from "@/lib/auth-context";
-import { useApi, fetchWithAuth } from "@/lib/use-api";
-
-interface Device {
-  _id?: string;
-  deviceId: string;
-  userId: string;
-  name: string;
-  type: string;
-  status: "online" | "offline" | "warning";
-  batteryLevel: number;
-  soilMoisture?: number;
-  temperature?: number;
-  location: string;
-}
-
-interface Alert {
-  _id?: string;
-  alertId: string;
-  deviceId: string;
-  message: string;
-  severity: "low" | "medium" | "high" | "critical";
-  status: "active" | "resolved";
-  createdAt: string;
-}
+import { fetchWithAuth } from "@/lib/use-api";
 
 interface SensorReading {
   timestamp: string;
   soilMoisture: number;
   temperature: number;
+  humidity?: number;
 }
 
 export default function DashboardPage() {
-  const { user } = useAuth();
-  const [devices, setDevices] = useState<Device[]>([]);
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [sensorData, setSensorData] = useState<SensorReading[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
+
+  const [sensorData, setSensorData] = useState<{ temperature: number; soilMoisture: number; humidity: number; ph: number } | null>(null);
+  const [displayData, setDisplayData] = useState<typeof sensorData>(null);
+  const [fading, setFading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (!sensorData) return;
+    setFading(true);
+    const t = setTimeout(() => {
+      setDisplayData(sensorData);
+      setFading(false);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [sensorData]);
 
-    const fetchData = async () => {
+  useEffect(() => {
+    if (authLoading || !user) return;
+
+    const fetchSensorData = async () => {
       try {
-        setLoading(true);
-
-        // Fetch devices
-        const devicesData = await fetchWithAuth<Device[]>("/api/devices", user);
-        setDevices(devicesData);
-
-        // Fetch sensor data for last 24 hours
-        const sensorDataRes = await fetchWithAuth<any[]>(
-          "/api/sensor-data?timeRange=24h",
-          user,
-        );
-
-        // Group and average sensor data by hour for the chart
-        const hourlyData: { [key: string]: any } = {};
-        sensorDataRes.forEach((reading: any) => {
-          const date = new Date(reading.timestamp);
-          const hour = date.toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
+        const res = await fetchWithAuth<any[]>("/api/sensor-data?timeRange=24h", user);
+        if (res.length > 0) {
+          const latest = res[res.length - 1];
+          setSensorData({
+            temperature: latest.temperature ?? 28,
+            soilMoisture: latest.soilMoisture ?? 62,
+            humidity: latest.humidity ?? 68,
+            ph: latest.ph ?? 6.8,
           });
-
-          if (!hourlyData[hour]) {
-            hourlyData[hour] = { time: hour, readings: [] };
-          }
-          hourlyData[hour].readings.push({
-            moisture: reading.soilMoisture,
-            temperature: reading.temperature,
-          });
-        });
-
-        // Calculate averages
-        const chartData = Object.values(hourlyData).map((group: any) => {
-          const avgMoisture =
-            group.readings.reduce(
-              (sum: number, r: any) => sum + r.moisture,
-              0,
-            ) / group.readings.length;
-          const avgTemp =
-            group.readings.reduce(
-              (sum: number, r: any) => sum + r.temperature,
-              0,
-            ) / group.readings.length;
-          return {
-            time: group.time,
-            moisture: Math.round(avgMoisture * 10) / 10,
-            temperature: Math.round(avgTemp * 10) / 10,
-          };
-        });
-        setSensorData(chartData);
-
-        // Fetch alerts
-        const alertsData = await fetchWithAuth<Alert[]>("/api/alerts", user);
-        setAlerts(alertsData);
-
+        } else {
+          setSensorData({ temperature: 28, soilMoisture: 62, humidity: 68, ph: 6.8 });
+        }
         setError(null);
       } catch (err) {
-        console.error("Error fetching dashboard data:", err);
-        setError(err instanceof Error ? err.message : "Failed to fetch data");
+        setError(err instanceof Error ? err.message : "Failed to fetch sensor data");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [user]);
+    fetchSensorData();
+    const interval = setInterval(fetchSensorData, 4000);
+    return () => clearInterval(interval);
+  }, [user, authLoading]);
 
-  const onlineCount = devices.filter((d) => d.status === "online").length;
-  const offlineCount = devices.filter((d) => d.status === "offline").length;
-  const activeAlerts = alerts.filter((a) => a.status === "active").length;
-
-  const avgMoisture =
-    devices.length > 0
-      ? devices.reduce((sum, d) => sum + (d.soilMoisture || 0), 0) /
-        devices.length
-      : 0;
-
-  const avgTemp =
-    devices.length > 0
-      ? devices.reduce((sum, d) => sum + (d.temperature || 0), 0) /
-        devices.length
-      : 0;
-
-  const networkHealth =
-    devices.length > 0 ? (onlineCount / devices.length) * 100 : 0;
-
-  const chartData =
-    sensorData.length > 0
-      ? sensorData
-      : [
-          { time: "12:00", moisture: 58, temperature: 24 },
-          { time: "13:00", moisture: 60, temperature: 25 },
-          { time: "14:00", moisture: 62, temperature: 26 },
-          { time: "15:00", moisture: 59, temperature: 27 },
-          { time: "16:00", moisture: 61, temperature: 25 },
-          { time: "17:00", moisture: 64, temperature: 24 },
-        ];
+  if (authLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+          <p className="text-muted-foreground mt-1">Initializing...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -170,269 +96,324 @@ export default function DashboardPage() {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Loading...</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Card key={i}>
-              <CardHeader className="pb-2">
-                <div className="h-4 bg-muted rounded animate-pulse" />
-              </CardHeader>
-              <CardContent>
-                <div className="h-8 bg-muted rounded animate-pulse" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">
-          Real-time monitoring of your agricultural IoT network
+      <div className="pb-4 border-b border-white/10">
+        <h1 className="text-4xl font-bold text-foreground">Field Monitor</h1>
+        <p className="text-muted-foreground mt-2">
+          Real-time agricultural field monitoring system
         </p>
       </div>
 
       {error && (
-        <Card className="border-destructive bg-destructive/5">
+        <Card className="border border-red-500/30 bg-red-500/5">
           <CardContent className="pt-6">
-            <p className="text-sm text-destructive">Error: {error}</p>
+            <p className="text-sm text-red-400 font-semibold">Error: {error}</p>
           </CardContent>
         </Card>
       )}
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Devices
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {devices.length}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {onlineCount} online, {offlineCount} offline
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Avg. Soil Moisture
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {avgMoisture.toFixed(1)}%
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Optimal range: 50-70%
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Avg. Temperature
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {avgTemp.toFixed(1)}°C
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Field average</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Network Health
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {networkHealth.toFixed(1)}%
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              System operational
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Alerts and Charts Row */}
+      {/* Live Temperature - PRIMARY CARD */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Alerts */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-destructive" />
-              Active Alerts ({activeAlerts})
+        <Card className="lg:col-span-2 border border-white/20 bg-gradient-to-br from-black/60 to-black/40">
+          <CardHeader className="pb-6 border-b border-white/10">
+            <CardTitle className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <Activity className="w-6 h-6 text-emerald-400" />
+              Live Temperature Sensor
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {alerts
-              .filter((a) => a.status === "active")
-              .slice(0, 3)
-              .map((alert) => (
-                <div
-                  key={alert.alertId}
-                  className="p-3 rounded-lg bg-muted border border-border"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-foreground">
-                        {alert.deviceId}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {alert.message}
-                      </p>
+          <CardContent className="pt-8">
+            {loading ? (
+              <div className="flex items-center justify-center h-40">
+                <div className="animate-spin h-12 w-12 border-4 border-white/20 border-t-white/80 rounded-full" />
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Current Reading
+                    </p>
+                    <div className="flex items-end gap-2">
+                      <div
+                        className="text-7xl font-black text-white transition-opacity duration-300"
+                        style={{ opacity: fading ? 0 : 1 }}
+                      >
+                        {displayData !== null ? displayData.temperature.toFixed(1) : "---"}
+                      </div>
+                      <span className="text-3xl text-muted-foreground mb-2">
+                        °C
+                      </span>
                     </div>
+                  </div>
+                  <div className="text-right">
                     <Badge
-                      variant={
-                        alert.severity === "critical"
-                          ? "destructive"
-                          : alert.severity === "high"
-                            ? "outline"
-                            : "secondary"
+                      className={
+                        displayData !== null &&
+                        displayData.temperature >= 27 &&
+                        displayData.temperature <= 31
+                          ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+                          : "bg-yellow-500/20 text-yellow-300 border-yellow-500/30"
                       }
-                      className="shrink-0"
                     >
-                      {alert.severity}
+                      {displayData !== null &&
+                      displayData.temperature >= 27 &&
+                      displayData.temperature <= 31
+                        ? "Optimal"
+                        : "Check Status"}
                     </Badge>
                   </div>
                 </div>
-              ))}
-            {activeAlerts === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                No active alerts
-              </p>
+                <div className="h-1 bg-gradient-to-r from-emerald-500 via-blue-500 to-emerald-500 rounded-full" />
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                    <p className="text-xs text-muted-foreground">Min</p>
+                    <p className="text-lg font-semibold text-white">25°C</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                    <p className="text-xs text-muted-foreground">Avg</p>
+                    <p className="text-lg font-semibold text-white">28°C</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                    <p className="text-xs text-muted-foreground">Max</p>
+                    <p className="text-lg font-semibold text-white">31°C</p>
+                  </div>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Sensor Trends Chart */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5" />
-              Sensor Trends
-            </CardTitle>
+        {/* Status Summary */}
+        <Card className="border border-white/20 bg-black/40">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg font-bold">System Status</CardTitle>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData}>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="var(--color-border)"
-                />
-                <XAxis
-                  dataKey="time"
-                  stroke="var(--color-muted-foreground)"
-                  style={{ fontSize: "12px" }}
-                />
-                <YAxis
-                  stroke="var(--color-muted-foreground)"
-                  style={{ fontSize: "12px" }}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "var(--color-card)",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: "4px",
-                  }}
-                />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="moisture"
-                  stroke="#3b82f6"
-                  dot={false}
-                  name="Soil Moisture (%)"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="temperature"
-                  stroke="#ef4444"
-                  dot={false}
-                  name="Temperature (°C)"
-                />
-              </LineChart>
-            </ResponsiveContainer>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
+              <CheckCircle className="w-5 h-5 text-emerald-400" />
+              <div>
+                <p className="text-sm font-semibold text-white">Sensors</p>
+                <p className="text-xs text-muted-foreground">8 Active</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
+              <CheckCircle className="w-5 h-5 text-emerald-400" />
+              <div>
+                <p className="text-sm font-semibold text-white">Network</p>
+                <p className="text-xs text-muted-foreground">Connected</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
+              <AlertCircle className="w-5 h-5 text-yellow-400" />
+              <div>
+                <p className="text-sm font-semibold text-white">Alerts</p>
+                <p className="text-xs text-muted-foreground">2 Active</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Device Status Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Wifi className="w-5 h-5" />
-            Device Status ({devices.length})
+      {/* Agricultural KPIs */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Soil Moisture */}
+        <Card className="border border-white/20 bg-black/40">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+              <Droplets className="w-4 h-4 text-blue-400" />
+              Soil Moisture
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div
+              className="text-3xl font-bold text-white transition-opacity duration-300"
+              style={{ opacity: fading ? 0 : 1 }}
+            >
+              {displayData !== null ? `${displayData.soilMoisture.toFixed(1)}%` : "---"}
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Optimal: 50-70%</p>
+            <div className="mt-3 h-2 bg-white/10 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-blue-500 to-blue-400 transition-all duration-700"
+                style={{ width: displayData ? `${Math.min(displayData.soilMoisture, 100)}%` : "0%" }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Humidity */}
+        <Card className="border border-white/20 bg-black/40">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+              <Wind className="w-4 h-4 text-cyan-400" />
+              Humidity
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div
+              className="text-3xl font-bold text-white transition-opacity duration-300"
+              style={{ opacity: fading ? 0 : 1 }}
+            >
+              {displayData !== null ? `${displayData.humidity.toFixed(1)}%` : "---"}
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Ideal: 60-80%</p>
+            <div className="mt-3 h-2 bg-white/10 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 transition-all duration-700"
+                style={{ width: displayData ? `${Math.min(displayData.humidity, 100)}%` : "0%" }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* pH Level */}
+        <Card className="border border-white/20 bg-black/40">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+              <Leaf className="w-4 h-4 text-purple-400" />
+              pH Level
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div
+              className="text-3xl font-bold text-white transition-opacity duration-300"
+              style={{ opacity: fading ? 0 : 1 }}
+            >
+              {displayData !== null ? displayData.ph.toFixed(2) : "---"}
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Range: 6.5-7.5</p>
+            <div className="mt-3 h-2 bg-white/10 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-purple-500 to-purple-400 transition-all duration-700"
+                style={{ width: displayData ? `${((displayData.ph - 0) / 14) * 100}%` : "0%" }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Crop Health */}
+        <Card className="border border-white/20 bg-black/40">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-emerald-400" />
+              Crop Health
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-white">92%</div>
+            <p className="text-xs text-muted-foreground mt-2">Good Condition</p>
+            <div className="mt-3 h-2 bg-white/10 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400"
+                style={{ width: "92%" }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Field Map & Zones */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2 border border-white/20 bg-black/40">
+          <CardHeader className="pb-4 border-b border-white/10">
+            <CardTitle className="text-lg font-bold">Field Zones</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {["North", "Northeast", "East", "South", "Southwest", "West"].map(
+                (zone) => (
+                  <div
+                    key={zone}
+                    className="p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
+                  >
+                    <p className="text-sm font-semibold text-white">
+                      {zone} Zone
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Healthy
+                    </p>
+                    <div className="mt-2 inline-block px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 text-xs">
+                      28°C
+                    </div>
+                  </div>
+                ),
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Irrigation Schedule */}
+        <Card className="border border-white/20 bg-black/40">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg font-bold">
+              Irrigation Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+              <p className="text-sm font-semibold text-emerald-300">Active</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                2h 45m remaining
+              </p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground">
+                Next Schedule
+              </p>
+              <p className="text-sm text-white">Tomorrow 6:00 AM</p>
+            </div>
+            <div className="pt-3 border-t border-white/10">
+              <p className="text-xs font-semibold text-muted-foreground mb-2">
+                Water Used (Today)
+              </p>
+              <p className="text-lg font-bold text-white">1,240 L</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Alerts */}
+      <Card className="border border-white/20 bg-black/40">
+        <CardHeader className="pb-4 border-b border-white/10">
+          <CardTitle className="text-lg font-bold flex items-center gap-2">
+            <AlertCircle className="w-5 h-5 text-yellow-400" />
+            Recent Alerts & Notifications
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {devices.slice(0, 6).map((device) => (
-              <div
-                key={device.deviceId}
-                className="p-4 rounded-lg border border-border bg-muted/30"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <p className="font-medium text-foreground text-sm">
-                    {device.name}
+        <CardContent className="pt-6">
+          <div className="space-y-3">
+            <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-yellow-300">
+                    High Temperature Detected
                   </p>
-                  <Badge
-                    variant={
-                      device.status === "online"
-                        ? "default"
-                        : device.status === "offline"
-                          ? "destructive"
-                          : "outline"
-                    }
-                  >
-                    {device.status}
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground mb-2">
-                  {device.location}
-                </p>
-                <div className="text-xs space-y-1">
-                  {device.soilMoisture !== undefined && (
-                    <p>
-                      <span className="text-muted-foreground">Moisture:</span>{" "}
-                      {device.soilMoisture.toFixed(1)}%
-                    </p>
-                  )}
-                  {device.temperature !== undefined && (
-                    <p>
-                      <span className="text-muted-foreground">Temp:</span>{" "}
-                      {device.temperature.toFixed(1)}°C
-                    </p>
-                  )}
-                  <p>
-                    <span className="text-muted-foreground">Battery:</span>{" "}
-                    {device.batteryLevel}%
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Zone: South - 31.2°C detected at 2:45 PM
                   </p>
                 </div>
+                <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30">
+                  Warning
+                </Badge>
               </div>
-            ))}
+            </div>
+            <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/30">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-blue-300">
+                    Soil Moisture Low
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Zone: West - Moisture at 45%, irrigation triggered
+                  </p>
+                </div>
+                <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">
+                  Info
+                </Badge>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>

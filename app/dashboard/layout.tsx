@@ -15,7 +15,6 @@ import {
   Settings,
   Menu,
   X,
-  Leaf,
   LogOut,
 } from 'lucide-react';
 
@@ -127,10 +126,10 @@ export default function DashboardLayout({
         } bg-sidebar border-r border-sidebar-border transition-all duration-300 flex flex-col overflow-hidden`}
       >
         {/* Logo */}
-        <div className="p-6 border-b border-sidebar-border flex items-center gap-2">
-          <Leaf className="w-6 h-6 text-green-500" />
+        <Link href="/" className="p-6 border-b border-sidebar-border flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <span className="text-xl">🌾</span>
           <h1 className="text-xl font-bold text-sidebar-foreground">Crop Link</h1>
-        </div>
+        </Link>
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">

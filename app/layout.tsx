@@ -24,7 +24,10 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Crop Link - Smart Agriculture IoT Dashboard',
   description: 'Real-time monitoring of agricultural IoT devices. Sensor data, analytics, and network metrics for LoRa-based farming systems.',
-  generator: 'v0.app',
+  icons: {
+    icon: '/icon.svg',
+    apple: '/apple-icon.png',
+  },
 }
 
 export default function RootLayout({

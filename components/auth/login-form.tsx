@@ -32,40 +32,34 @@ export function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
-      {/* Animated background elements */}
+    <div className="min-h-screen bg-black flex items-center justify-center px-4">
+      {/* Background grid lines — matches landing page */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+        {[...Array(8)].map((_, i) => (
+          <div key={`h-${i}`} className="absolute h-px bg-white/10" style={{ top: `${12.5 * (i + 1)}%`, left: 0, right: 0 }} />
+        ))}
+        {[...Array(12)].map((_, i) => (
+          <div key={`v-${i}`} className="absolute w-px bg-white/10" style={{ left: `${8.33 * (i + 1)}%`, top: 0, bottom: 0 }} />
+        ))}
+      </div>
+
+      {/* Ambient glow blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div 
-          className="absolute w-96 h-96 rounded-full opacity-10 blur-3xl"
-          style={{
-            background: 'radial-gradient(circle, #10b981 0%, transparent 70%)',
-            top: '10%',
-            left: '10%'
-          }}
-        />
-        <div 
-          className="absolute w-96 h-96 rounded-full opacity-10 blur-3xl"
-          style={{
-            background: 'radial-gradient(circle, #3b82f6 0%, transparent 70%)',
-            bottom: '10%',
-            right: '10%'
-          }}
-        />
+        <div className="absolute w-96 h-96 rounded-full opacity-10 blur-3xl" style={{ background: 'radial-gradient(circle, #10b981 0%, transparent 70%)', top: '10%', left: '10%' }} />
+        <div className="absolute w-96 h-96 rounded-full opacity-10 blur-3xl" style={{ background: 'radial-gradient(circle, #3b82f6 0%, transparent 70%)', bottom: '10%', right: '10%' }} />
       </div>
 
       <div className="relative z-10 w-full max-w-md">
-        {/* Logo */}
+        {/* Logo — matches landing nav */}
         <div className="flex items-center justify-center gap-2 mb-8">
-          <Leaf className="w-8 h-8 text-emerald-500" />
-          <span className="text-2xl font-bold bg-gradient-to-r from-emerald-500 to-blue-500 bg-clip-text text-transparent">
-            Crop Link
-          </span>
+          <span className="text-2xl">🌾</span>
+          <span className="text-xl font-bold text-white">Crop Link</span>
         </div>
 
         {/* Card */}
-        <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 backdrop-blur-sm p-8">
+        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-lg p-8">
           <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
-          <p className="text-slate-400 text-sm mb-6">Sign in to your account to continue</p>
+          <p className="text-white/50 text-sm mb-6">Sign in to your account to continue</p>
 
           {error && (
             <div className="mb-4 p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
@@ -75,7 +69,7 @@ export function LoginForm() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-white/70 mb-2">
                 Email Address
               </label>
               <Input
@@ -84,12 +78,12 @@ export function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500 focus:border-emerald-500"
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-emerald-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-white/70 mb-2">
                 Password
               </label>
               <Input
@@ -98,32 +92,31 @@ export function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500 focus:border-emerald-500"
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-emerald-500"
               />
             </div>
 
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold h-10 mt-2"
+              className="w-full bg-white text-black hover:bg-white/90 font-semibold h-10 mt-2"
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-slate-400 text-sm">
+            <p className="text-white/50 text-sm">
               Don&apos;t have an account?{' '}
-              <Link href="/auth/signup" className="text-emerald-500 hover:text-emerald-400 font-semibold">
+              <Link href="/auth/signup" className="text-emerald-400 hover:text-emerald-300 font-semibold">
                 Sign up
               </Link>
             </p>
           </div>
         </div>
 
-        {/* Demo Credentials */}
-        <div className="mt-6 text-center text-xs text-slate-500">
-          <p>Demo: test@example.com / password123</p>
+        <div className="mt-6 text-center text-xs text-white/30">
+          <p>Smart IoT monitoring for agriculture</p>
         </div>
       </div>
     </div>

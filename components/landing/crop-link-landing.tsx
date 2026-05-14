@@ -9,12 +9,14 @@ import { CropFeatures } from './crop-features';
 import { CropTestimonials } from './crop-testimonials';
 // import { CropPricing } from './crop-pricing';
 import { CropHowItWorks } from './crop-how-it-works';
+import { useAuth } from '@/lib/auth-context';
 
 const words = ['grow', 'thrive', 'yield', 'prosper'];
 
 export function CropLinkLanding() {
   const [isVisible, setIsVisible] = useState(false);
   const [wordIndex, setWordIndex] = useState(0);
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     setIsVisible(true);
@@ -37,16 +39,28 @@ export function CropLinkLanding() {
             <span className="text-lg font-bold text-white">Crop Link</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/auth/login">
-              <Button variant="ghost" size="sm" className="text-white hover:text-white">
-                Sign In
-              </Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button size="sm" className="bg-white text-black hover:bg-white/90">
-                Get Started
-              </Button>
-            </Link>
+            {!loading && (
+              user ? (
+                <Link href="/dashboard">
+                  <Button size="sm" className="bg-white text-black hover:bg-white/90">
+                    Go to Dashboard
+                  </Button>
+                </Link>
+              ) : (
+                <>
+                  <Link href="/auth/login">
+                    <Button variant="ghost" size="sm" className="text-white hover:text-white">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link href="/auth/signup">
+                    <Button size="sm" className="bg-white text-black hover:bg-white/90">
+                      Get Started
+                    </Button>
+                  </Link>
+                </>
+              )
+            )}
           </div>
         </div>
       </nav>
@@ -153,7 +167,7 @@ export function CropLinkLanding() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-white/20 text-white hover:bg-white/10"
+                className="border-white/50 text-white hover:bg-white/10 hover:border-white transition-colors duration-200"
               >
                 Watch Demo
               </Button>
@@ -214,7 +228,7 @@ export function CropLinkLanding() {
             <Button
               size="lg"
               variant="outline"
-              className="border-white/20 text-white hover:bg-white/10"
+              className="border-white/50 text-white hover:bg-white/10 hover:border-white transition-colors duration-200"
             >
               Schedule Demo
             </Button>

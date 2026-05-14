@@ -54,7 +54,7 @@ export default function SettingsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+        <h1 className="text-3xl font-bold text-white">Settings</h1>
         <p className="text-muted-foreground mt-1">
           Configure thresholds and notifications
         </p>
@@ -70,22 +70,23 @@ export default function SettingsPage() {
       )}
 
       {/* Threshold Settings */}
-      <Card>
+      <Card className="border-white/10 bg-white/5">
         <CardHeader>
-          <CardTitle>Sensor Thresholds</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-white">Sensor Thresholds</CardTitle>
+          <CardDescription className="text-white/50">
             Set alert thresholds for sensor readings
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Soil Moisture */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Soil Moisture (%)</h3>
+            <h3 className="font-semibold text-white">Soil Moisture (%)</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="soil-min" className="text-muted-foreground">
+                <Label htmlFor="soil-min" className="text-white/50">
                   Minimum Threshold
                 </Label>
+
                 <Input
                   id="soil-min"
                   type="number"
@@ -94,15 +95,15 @@ export default function SettingsPage() {
                   value={thresholds.soilMoistureMin}
                   onChange={(e) =>
                     handleThresholdChange(
-                      'soilMoistureMin',
-                      parseInt(e.target.value)
+                      "soilMoistureMin",
+                      parseInt(e.target.value),
                     )
                   }
-                  className="mt-2"
+                  className="mt-2 bg-white/5 border-white/10 text-white"
                 />
               </div>
               <div>
-                <Label htmlFor="soil-max" className="text-muted-foreground">
+                <Label htmlFor="soil-max" className="text-white/50">
                   Maximum Threshold
                 </Label>
                 <Input
@@ -113,16 +114,17 @@ export default function SettingsPage() {
                   value={thresholds.soilMoistureMax}
                   onChange={(e) =>
                     handleThresholdChange(
-                      'soilMoistureMax',
-                      parseInt(e.target.value)
+                      "soilMoistureMax",
+                      parseInt(e.target.value),
                     )
                   }
-                  className="mt-2"
+                  className="mt-2 bg-white/5 border-white/10 text-white"
                 />
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              Alert triggered when soil moisture falls below minimum or exceeds maximum
+              Alert triggered when soil moisture falls below minimum or exceeds
+              maximum
             </p>
           </div>
 
@@ -130,12 +132,13 @@ export default function SettingsPage() {
 
           {/* Temperature */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Temperature (°C)</h3>
+            <h3 className="font-semibold text-white">Temperature (°C)</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="temp-min" className="text-muted-foreground">
+                <Label htmlFor="temp-min" className="text-white/50">
                   Minimum Threshold
                 </Label>
+
                 <Input
                   id="temp-min"
                   type="number"
@@ -143,13 +146,16 @@ export default function SettingsPage() {
                   max="50"
                   value={thresholds.temperatureMin}
                   onChange={(e) =>
-                    handleThresholdChange('temperatureMin', parseInt(e.target.value))
+                    handleThresholdChange(
+                      "temperatureMin",
+                      parseInt(e.target.value),
+                    )
                   }
-                  className="mt-2"
+                  className="mt-2 bg-white/5 border-white/10 text-white"
                 />
               </div>
               <div>
-                <Label htmlFor="temp-max" className="text-muted-foreground">
+                <Label htmlFor="temp-max" className="text-white/50">
                   Maximum Threshold
                 </Label>
                 <Input
@@ -159,14 +165,18 @@ export default function SettingsPage() {
                   max="50"
                   value={thresholds.temperatureMax}
                   onChange={(e) =>
-                    handleThresholdChange('temperatureMax', parseInt(e.target.value))
+                    handleThresholdChange(
+                      "temperatureMax",
+                      parseInt(e.target.value),
+                    )
                   }
-                  className="mt-2"
+                  className="mt-2 bg-white/5 border-white/10 text-white"
                 />
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              Alert triggered when temperature drops below minimum or rises above maximum
+              Alert triggered when temperature drops below minimum or rises
+              above maximum
             </p>
           </div>
 
@@ -174,12 +184,13 @@ export default function SettingsPage() {
 
           {/* Humidity */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Humidity (%)</h3>
+            <h3 className="font-semibold text-white">Humidity (%)</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="humidity-min" className="text-muted-foreground">
+                <Label htmlFor="humidity-min" className="text-white/50">
                   Minimum Threshold
                 </Label>
+
                 <Input
                   id="humidity-min"
                   type="number"
@@ -187,13 +198,16 @@ export default function SettingsPage() {
                   max="100"
                   value={thresholds.humidityMin}
                   onChange={(e) =>
-                    handleThresholdChange('humidityMin', parseInt(e.target.value))
+                    handleThresholdChange(
+                      "humidityMin",
+                      parseInt(e.target.value),
+                    )
                   }
-                  className="mt-2"
+                  className="mt-2 bg-white/5 border-white/10 text-white"
                 />
               </div>
               <div>
-                <Label htmlFor="humidity-max" className="text-muted-foreground">
+                <Label htmlFor="humidity-max" className="text-white/50">
                   Maximum Threshold
                 </Label>
                 <Input
@@ -203,83 +217,86 @@ export default function SettingsPage() {
                   max="100"
                   value={thresholds.humidityMax}
                   onChange={(e) =>
-                    handleThresholdChange('humidityMax', parseInt(e.target.value))
+                    handleThresholdChange(
+                      "humidityMax",
+                      parseInt(e.target.value),
+                    )
                   }
-                  className="mt-2"
+                  className="mt-2 bg-white/5 border-white/10 text-white"
                 />
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              Alert triggered when humidity falls below minimum or exceeds maximum
+              Alert triggered when humidity falls below minimum or exceeds
+              maximum
             </p>
           </div>
         </CardContent>
       </Card>
 
       {/* Notification Settings */}
-      <Card>
+      <Card className="border-white/10 bg-white/5">
         <CardHeader>
-          <CardTitle>Notifications</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-white">Notifications</CardTitle>
+          <CardDescription className="text-white/50">
             Manage how and when you receive alerts
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
+        <CardContent className="p-0">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <div className="flex-1">
-              <Label htmlFor="email-alerts" className="text-foreground font-medium">
+              <Label htmlFor="email-alerts" className="text-white font-medium">
                 Email Alerts
               </Label>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-sm text-white/50 mt-1">
                 Receive email notifications for alerts
               </p>
             </div>
             <Switch
               id="email-alerts"
+              className="border-white"
               checked={notifications.emailAlerts}
               onCheckedChange={(checked) =>
-                handleNotificationChange('emailAlerts', checked)
+                handleNotificationChange("emailAlerts", checked)
               }
             />
           </div>
 
-          <Separator />
-
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <div className="flex-1">
-              <Label htmlFor="critical-only" className="text-foreground font-medium">
+              <Label htmlFor="critical-only" className="text-white font-medium">
                 Critical Alerts Only
               </Label>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-sm text-white/50 mt-1">
                 Only notify for critical severity alerts
               </p>
             </div>
             <Switch
               id="critical-only"
+              className="border-white"
               checked={notifications.criticalOnly}
               onCheckedChange={(checked) =>
-                handleNotificationChange('criticalOnly', checked)
+                handleNotificationChange("criticalOnly", checked)
               }
               disabled={!notifications.emailAlerts}
             />
           </div>
 
-          <Separator />
-
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between px-6 py-4">
             <div className="flex-1">
-              <Label htmlFor="daily-report" className="text-foreground font-medium">
+              <Label htmlFor="daily-report" className="text-white font-medium">
                 Daily Report
               </Label>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-sm text-white/50 mt-1">
                 Receive a daily summary report at 8:00 AM
               </p>
             </div>
             <Switch
               id="daily-report"
+              className="border-white"
               checked={notifications.dailyReport}
               onCheckedChange={(checked) =>
-                handleNotificationChange('dailyReport', checked)
+                handleNotificationChange("dailyReport", checked)
               }
               disabled={!notifications.emailAlerts}
             />
@@ -288,33 +305,37 @@ export default function SettingsPage() {
       </Card>
 
       {/* System Information */}
-      <Card>
+      <Card className="border-white/10 bg-white/5">
         <CardHeader>
-          <CardTitle>System Information</CardTitle>
+          <CardTitle className="text-white">System Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">System Version</span>
-            <span className="font-medium">v1.0.0</span>
+            <span className="text-white/50">System Version</span>
+            <span className="font-medium text-white">v1.0.0</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Last Updated</span>
-            <span className="font-medium">2024-04-15</span>
+            <span className="text-white/50">Last Updated</span>
+            <span className="font-medium text-white">2024-04-15</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Database Status</span>
-            <span className="font-medium text-green-500">Connected</span>
+            <span className="text-white/50">Database Status</span>
+            <span className="font-medium text-emerald-400">Connected</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">LoRa Gateway Status</span>
-            <span className="font-medium text-green-500">Online</span>
+            <span className="text-white/50">LoRa Gateway Status</span>
+            <span className="font-medium text-emerald-400">Online</span>
           </div>
         </CardContent>
       </Card>
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <Button onClick={handleSave} size="lg" className="gap-2">
+        <Button
+          onClick={handleSave}
+          size="lg"
+          className="gap-2 bg-white text-black hover:bg-white/90 font-semibold"
+        >
           <Save className="w-4 h-4" />
           Save Settings
         </Button>
